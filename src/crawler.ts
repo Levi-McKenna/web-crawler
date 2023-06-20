@@ -1,4 +1,10 @@
-export function normalizeURL(urlStr: string): string {
+import { JSDOM } from 'jsdom';
+
+function getURLfromHTML(htmlDOM: JSDOM): string {
+    return normalizeURL(htmlDOM.window.location.toString());
+}
+
+function normalizeURL(urlStr: string): string {
     const url = new URL(urlStr);
     const normalizedURL = `${url.hostname}${url.pathname}`;
     // removes all trailing forward slashes
@@ -7,5 +13,11 @@ export function normalizeURL(urlStr: string): string {
     } 
     // if there are no tailing slashes return the string literal
     return normalizedURL;
+}
+
+
+module.exports = {
+    normalizeURL,
+    getURLfromHTML
 }
 
