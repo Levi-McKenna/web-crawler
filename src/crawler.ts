@@ -1,7 +1,15 @@
 import { JSDOM } from 'jsdom';
 
-function getURLfromHTML(htmlDOM: JSDOM): string {
-    return normalizeURL(htmlDOM.window.location.toString());
+function getURLfromHTML(htmlStr: JSDOM, baseURL: string): string[] {
+    // parses string to a dom
+    const htmlDOM = new JSDOM(`${htmlStr}`);
+    const possibleURLS: string[] = [normalizeURL(baseURL)];
+    // grabs all <a></a> nodes under the dom
+    const allHREFS = htmlDOM.window.document.querySelectorAll('a');
+    allHREFS.forEach(node => {
+        possibleURLS.push(normalizeURL(node.href));
+    });
+    return possibleURLS;
 }
 
 function normalizeURL(urlStr: string): string {
