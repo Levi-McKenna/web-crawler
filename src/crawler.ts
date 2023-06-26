@@ -1,5 +1,13 @@
 import { JSDOM } from 'jsdom';
 
+async function grabJSDOMfromURL(url: string) {
+    //grab html dom from url
+    const htmlResponse = await JSDOM.fromURL(url);
+    console.log(htmlResponse.window.document.documentElement.outerHTML);
+
+    return url;
+}
+
 function getURLfromHTML(htmlStr: JSDOM, baseURL: string): string[] {
     // parses string to a dom
     const htmlDOM = new JSDOM(`${htmlStr}`);
@@ -16,7 +24,7 @@ function normalizeURL(urlStr: string): string {
     const url = new URL(urlStr);
     const normalizedURL = `${url.hostname}${url.pathname}`;
     // removes all trailing forward slashes
-    if (normalizedURL.length > 0 && normalizedURL[normalizedURL.length-1] === '/'){
+    if (normalizedURL.length > 0 && normalizedURL[normalizedURL.length-1] === '/'){ 
         return normalizedURL.slice(0, -1);
     } 
     // if there are no tailing slashes return the string literal
@@ -26,6 +34,7 @@ function normalizeURL(urlStr: string): string {
 
 module.exports = {
     normalizeURL,
-    getURLfromHTML
+    getURLfromHTML,
+    grabJSDOMfromURL
 }
 
