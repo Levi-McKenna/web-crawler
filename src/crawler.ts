@@ -1,5 +1,9 @@
 import { JSDOM } from 'jsdom';
 
+function crawlPage(currentURL: string) {
+    console.log(`crawling with my cock all over the wall at: ${currentURL}`)
+}
+
 function getURLfromHTML(htmlStr: JSDOM, baseURL: string): string[] {
     // parses string to a dom
     const htmlDOM = new JSDOM(`${htmlStr}`);
