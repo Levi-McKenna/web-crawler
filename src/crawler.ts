@@ -7,10 +7,20 @@ function getURLfromHTML(htmlStr: JSDOM, baseURL: string): string[] {
     // grabs all <a></a> nodes under the dom
     const allHREFS = htmlDOM.window.document.querySelectorAll('a');
     allHREFS.forEach(node => {
+        // checks for relative URL if so parses the base url to the paths
         if (node.href[0] === '/') {
-            possibleURLS.push(`${possibleURLS[0]}/${node}`);
+            try {
+                possibleURLS.push(normalizeURL(`${baseURL}${node}`));
+            }catch (err) {
+                console.error('INVALID URL');
+            }
+        } else{
+            try  {
+                possibleURLS.push(normalizeURL(node.href));
+            } catch (err) {
+                console.error('INVALID URL');
+            }
         }
-        possibleURLS.push(normalizeURL(node.href));
     });
     return possibleURLS;
 }
