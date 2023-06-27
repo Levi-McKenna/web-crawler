@@ -7,6 +7,9 @@ function getURLfromHTML(htmlStr: JSDOM, baseURL: string): string[] {
     // grabs all <a></a> nodes under the dom
     const allHREFS = htmlDOM.window.document.querySelectorAll('a');
     allHREFS.forEach(node => {
+        if (node.href[0] === '/') {
+            possibleURLS.push(`${possibleURLS[0]}/${node}`);
+        }
         possibleURLS.push(normalizeURL(node.href));
     });
     return possibleURLS;
