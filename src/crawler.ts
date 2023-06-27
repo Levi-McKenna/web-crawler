@@ -1,7 +1,24 @@
 import { JSDOM } from 'jsdom';
 
-function crawlPage(currentURL: string) {
-    console.log(`crawling with my cock all over the wall at: ${currentURL}`)
+async function crawlPage(currentURL: string) {
+    console.log(`crawling with my cock all over the wall at: ${currentURL}`);
+    // get request to current url
+    try {
+        const resp = await fetch(currentURL);
+        if (resp.status > 399){ 
+            console.log(`Error status code: ${resp.status} on page: ${currentURL}`);
+            return;
+        }
+        const contentType = resp.headers.get("content-type");
+        if (contentType !== 'text/html; charset=UTF-8') {
+            console.log(`Error: Invalid content-type: ${contentType}, on page: ${currentURL}`);
+            return;
+        }
+        // log html
+        console.log(await resp.text());
+    } catch (err) {
+        console.error(`Error in fetch request: ${err.message}, on: ${currentURL}`);
+    }
 }
 
 function getURLfromHTML(htmlStr: JSDOM, baseURL: string): string[] {
@@ -44,5 +61,6 @@ function normalizeURL(urlStr: string): string {
 module.exports = {
     normalizeURL,
     getURLfromHTML,
+    crawlPage
 }
 
