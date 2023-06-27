@@ -1,48 +1,63 @@
 import { JSDOM } from 'jsdom';
 
-async function crawlPage(currentURL: string) {
+async function crawlPage(currentURL: string, pages: {[index: string]: boolean}): Promise<{[index: string]: boolean}> {
+    // check if url has already been scraped
+    const normalizedCurrURL = normalizeURL(currentURL);
+    if (pages[normalizedCurrURL]) return pages;
+    else {
+        pages[normalizedCurrURL] = true;
+    }
     console.log(`crawling with my cock all over the wall at: ${currentURL}`);
-    // get request to current url
     try {
         const resp = await fetch(currentURL);
         if (resp.status > 399){ 
             console.log(`Error status code: ${resp.status} on page: ${currentURL}`);
-            return;
+            return pages;
         }
         const contentType = resp.headers.get("content-type");
         if (contentType !== 'text/html; charset=UTF-8') {
             console.log(`Error: Invalid content-type: ${contentType}, on page: ${currentURL}`);
-            return;
+            return pages;
         }
-        // log html
-        console.log(await resp.text());
+        const currentURLS = getURLfromHTML(await resp.text(), currentURL);
+        // loop through all urls and recurse them
+        for (const url of currentURLS) {
+            await crawlPage(url, pages);
+        }
     } catch (err) {
         console.error(`Error in fetch request: ${err.message}, on: ${currentURL}`);
     }
+    return pages;
 }
 
-function getURLfromHTML(htmlStr: JSDOM, baseURL: string): string[] {
+function getURLfromHTML(htmlStr: string, baseURL: string): string[] {
     // parses string to a dom
     const htmlDOM = new JSDOM(`${htmlStr}`);
-    const possibleURLS: string[] = [normalizeURL(baseURL)];
+    const possibleURLS: string[] = [];
     // grabs all <a></a> nodes under the dom
     const allHREFS = htmlDOM.window.document.querySelectorAll('a');
-    allHREFS.forEach(node => {
+    for (const node of allHREFS) {
         // checks for relative URL if so parses the base url to the paths
         if (node.href[0] === '/') {
+            // checks to make sure there is not a loop back path
+            if (node.href.length === 1) continue;
             try {
-                possibleURLS.push(normalizeURL(`${baseURL}${node}`));
+                possibleURLS.push(`${baseURL}${node.href}`);
             }catch (err) {
                 console.error('INVALID URL');
             }
-        } else{
+        } else {
+            // checks that node's path does not out source to a new website
+            const tmpNodeURL = new URL(node.href);
+            const tmpBaseURL = new URL(baseURL);
+            if (tmpNodeURL.hostname !== tmpBaseURL.hostname) continue;
             try  {
-                possibleURLS.push(normalizeURL(node.href));
+                possibleURLS.push(node.href);
             } catch (err) {
                 console.error('INVALID URL');
             }
         }
-    });
+    }
     return possibleURLS;
 }
 

@@ -1,6 +1,6 @@
 const { crawlPage } = require('./crawler');
 
-function main() {
+async function main() {
     try {
         if (process.argv.length < 3) throw new Error();
         new URL(process.argv[2]);
@@ -10,8 +10,9 @@ function main() {
         process.exit(1);
     }
     const baseURL = process.argv[2];
-
-    crawlPage(baseURL);
+    // crawl page and log all pages
+    const pages = await crawlPage(baseURL, {});
+    console.log(pages);
 }
 
 main();
