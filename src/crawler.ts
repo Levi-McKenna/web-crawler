@@ -1,11 +1,13 @@
 import { JSDOM } from 'jsdom';
 
-async function crawlPage(currentURL: string, pages: {[index: string]: boolean}): Promise<{[index: string]: boolean}> {
+async function crawlPage(currentURL: string, pages: {[index: string]: number}): Promise<{[index: string]: number}> {
     // check if url has already been scraped
     const normalizedCurrURL = normalizeURL(currentURL);
-    if (pages[normalizedCurrURL]) return pages;
-    else {
-        pages[normalizedCurrURL] = true;
+    if (pages[normalizedCurrURL]) {
+        pages[normalizedCurrURL] += 1;
+        return pages;
+    } else {
+        pages[normalizedCurrURL] = 1;
     }
     console.log(`crawling with my cock all over the wall at: ${currentURL}`);
     try {
@@ -32,7 +34,7 @@ async function crawlPage(currentURL: string, pages: {[index: string]: boolean}):
 
 function getURLfromHTML(htmlStr: string, baseURL: string): string[] {
     // parses string to a dom
-    const htmlDOM = new JSDOM(`${htmlStr}`);
+    const htmlDOM = new JSDOM(htmlStr);
     const possibleURLS: string[] = [];
     // grabs all <a></a> nodes under the dom
     const allHREFS = htmlDOM.window.document.querySelectorAll('a');
@@ -50,12 +52,11 @@ function getURLfromHTML(htmlStr: string, baseURL: string): string[] {
             // checks that node's path does not out source to a new website
             const tmpNodeURL = new URL(node.href);
             const tmpBaseURL = new URL(baseURL);
-            if (tmpNodeURL.hostname !== tmpBaseURL.hostname) continue;
             try  {
-                possibleURLS.push(node.href);
-            } catch (err) {
-                console.error('INVALID URL');
-            }
+                    if (tmpNodeURL.hostname === tmpBaseURL.hostname) possibleURLS.push(node.href);
+                } catch (err) {
+                    console.error('INVALID URL');
+                }
         }
     }
     return possibleURLS;
