@@ -1,2 +1,2 @@
 # web-crawler
-A practice web crawler for my backend skills!
+A practice web crawler.
